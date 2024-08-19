@@ -1,0 +1,65 @@
+Resource:
+  BuildRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+            Effect: Allow
+            Principal:
+              Service: codebuild.amazonaws.com
+            Action: sts:AssumeRole
+      RoleName: codebuild-web-app
+      
+  CodePipelineRole:
+    Type: AWS::IAM::Role
+    Properties:
+      AssumeRolePolicyDocument: 
+        Version: "2012-10-17"
+        Statement:
+            Effect: Allow
+            Principal:
+              Service: codepipeline.amazonaws.com
+            Action: sts:AssumeRole
+      RoleName: codepipeline-web-app
+      
+  Build:
+    Type: AWS::CodeBuild::Project
+    Properties:
+      Artifacts: 
+        Type: CODEPIPELINE
+      Environment: 
+        ComputeType: BUILD_GENERAL1_LARGE
+        Image: "aws/codebuild/standard:5.0"
+        Type: LINUX_CONTAINER
+      ServiceRole: !Ref BuildRole
+      Source: 
+        Type: CODEPIPELINE
+        BuildSpec: buildspec.yml
+      Name: codebuild-simple-fe
+  
+  ArtifactS3Bucket:
+    Type: AWS::S3::Bucket
+    Properties:
+      BucketName: ovo-codebuild-store-1922
+
+  Pipeline:
+    Type: AWS::CodePipeline::Pipeline
+    Properties:
+      ArtifactStore: 
+        Location: !Ref ArtifactS3Bucket
+        Type: S3
+      Name: String
+      PipelineType: String
+      RestartExecutionOnUpdate: Boolean
+      RoleArn: !Ref CodePipelineRole
+      Stages: 
+        - StageDeclaration
+      Tags: 
+        - Tag
+      Triggers: 
+        - PipelineTriggerDeclaration
+      Variables: 
+        - VariableDeclaration
+
+
